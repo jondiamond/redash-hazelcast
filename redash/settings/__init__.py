@@ -391,7 +391,8 @@ default_query_runners = [
     "redash.query_runner.csv",
     "redash.query_runner.firebolt",
     "redash.query_runner.nz",
-    "redash.query_runner.arango"
+    "redash.query_runner.arango",
+    "redash.query_runner.hazelcast"
 ]
 
 enabled_query_runners = array_from_string(
@@ -463,7 +464,7 @@ QUERY_REFRESH_INTERVALS = list(
         array_from_string(
             os.environ.get(
                 "REDASH_QUERY_REFRESH_INTERVALS",
-                "60, 300, 600, 900, 1800, 3600, 7200, 10800, 14400, 18000, 21600, 25200, 28800, 32400, 36000, 39600, 43200, 86400, 604800, 1209600, 2592000",
+                "5, 10, 20, 30, 60, 300, 600, 900, 1800, 3600, 7200, 10800, 14400, 18000, 21600, 25200, 28800, 32400, 36000, 39600, 43200, 86400, 604800, 1209600, 2592000",
             )
         ),
     )
