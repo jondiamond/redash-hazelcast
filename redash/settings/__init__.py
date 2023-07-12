@@ -453,7 +453,7 @@ DASHBOARD_REFRESH_INTERVALS = list(
         int,
         array_from_string(
             os.environ.get(
-                "REDASH_DASHBOARD_REFRESH_INTERVALS", "60,300,600,1800,3600,43200,86400"
+                "REDASH_DASHBOARD_REFRESH_INTERVALS", "5, 10, 20, 30, 60,300,600,1800,3600,43200,86400"
             )
         ),
     )

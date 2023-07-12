@@ -3,11 +3,13 @@ try:
     import random
     import os
     import hazelcast
+    import requests
+    import sys
+
     from hazelcast.core import HazelcastJsonValue
     from hazelcast.discovery import HazelcastCloudDiscovery
     from tempfile import NamedTemporaryFile
     from base64 import b64decode
-
     enabled = True
 except ImportError:
     enabled = False
@@ -73,6 +75,7 @@ def _get_ssl_config(configuration):
 
 
 class Hazelcast(BaseQueryRunner):
+    should_annotate_query = False
     noop_query = "SELECT 1"
 
     @classmethod
@@ -105,7 +108,7 @@ class Hazelcast(BaseQueryRunner):
         return t
 
     def _get_connection(self):
-        
+
         max_connection_timeout=60
 
         if (self.configuration.get("discoveryToken") is not None and len(self.configuration.get("discoveryToken")) > 0):
@@ -206,10 +209,33 @@ class Hazelcast(BaseQueryRunner):
 
         return data
 
-    def run_query(self, query, user, parameters=None):
 
-        if parameters is None:
-            parameters = []
+    def lookup_query_id_from_result(self, result):
+        return 0
+
+    def get_query_id_from_hash(self, query_hash, client):
+
+        query_id_hash_map = client.get_map("query_id_hash_map")
+
+        query_id = query_id_hash_map.get(query_hash)
+
+        if query_id is None:
+            print("No matching query_hash: " + query_hash + " found in map")
+            return 0
+        else:
+            print("Found query_id: " + query_id)
+            return query_id
+
+    def run_query(self, query, user, metadata=None):
+
+        query_id = 0
+        query_hash = ""
+
+        print("HZ debug [query]:" + query, file=sys.stderr )
+
+        if metadata is not None:
+            print("HZ debug [metadata]:", file=sys.stderr )
+            print(metadata, file=sys.stderr )
 
         self.ssl_config = _get_ssl_config(self.configuration)
         client = self._get_connection()
@@ -219,8 +245,9 @@ class Hazelcast(BaseQueryRunner):
         results = []
 
         try:
+
             for statement in sql_statements:
-                result = client.sql.execute(statement, *parameters).result()
+                result = client.sql.execute(statement).result()
                 results.append(self._parse_results(result))
 
             # Combine the results

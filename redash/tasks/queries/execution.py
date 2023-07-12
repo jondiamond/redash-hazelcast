@@ -1,6 +1,7 @@
 import signal
 import time
 import redis
+import inspect
 
 from rq import get_current_job
 from rq.job import JobStatus
@@ -185,7 +186,21 @@ class QueryExecutor(object):
         annotated_query = self._annotate_query(query_runner)
 
         try:
-            data, error = query_runner.run_query(annotated_query, self.user)
+            num_args = len(inspect.getargspec(query_runner.run_query).args)
+
+            if num_args == 2:
+                data, error = query_runner.run_query(annotated_query, self.user)
+            else:
+                parameters = {
+                    "user_id": self.user.id,
+                    "org_id": self.data_source.org_id,
+                    "query_id": self.query_id,
+                    "query_hash": self.query_hash,
+                    "data_source_id": self.data_source.id,
+                    "metadata": self.metadata,
+                }
+                data, error = query_runner.run_query(annotated_query, self.user, parameters)
+
         except Exception as e:
             if isinstance(e, JobTimeoutException):
                 error = TIMEOUT_MESSAGE

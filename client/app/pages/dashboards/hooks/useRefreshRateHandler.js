@@ -6,7 +6,7 @@ import useImmutableCallback from "@/lib/hooks/useImmutableCallback";
 
 function getLimitedRefreshRate(refreshRate) {
   const allowedIntervals = policy.getDashboardRefreshIntervals();
-  return max([30, min(allowedIntervals), refreshRate]);
+  return max([0, min(allowedIntervals), refreshRate]);
 }
 
 function getRefreshRateFromUrl() {
