@@ -98,6 +98,14 @@ class Hazelcast(BaseQueryRunner):
         }
 
     @classmethod
+    def type(cls):
+        return "hazelcast"
+
+    @classmethod
+    def name(cls):
+        return "Hazelcast Platform"
+
+    @classmethod
     def enabled(cls):
         return enabled
 
